@@ -5,6 +5,8 @@ from typing import Union
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from src.youtube import download_audio_from_url, is_youtube_link
+
 app = FastAPI()
 
 
@@ -37,7 +39,12 @@ def cli():
     parser.add_argument("source", type=str, help="The URL or filename to transcribe")
     args = parser.parse_args()
 
-    result = process_input(args.source)
+    source = args.source
+    if is_youtube_link(args.source):
+        print("Downloading audio from YouTube...")
+        source, _ = download_audio_from_url(args.source)
+
+    result = process_input(source)
     print(json.dumps(result, indent=2))
 
 
