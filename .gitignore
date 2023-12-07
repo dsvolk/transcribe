@@ -1,6 +1,7 @@
 # Logs etc
 logs/
 data/
+models/
 notebooks/data/
 .vscode/
 

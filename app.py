@@ -1,11 +1,18 @@
 import argparse
 import json
+from pprint import pprint
 from typing import Union
 
 from fastapi import FastAPI, HTTPException
+from langchain.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLoader
+from langchain.document_loaders.generic import GenericLoader
+
+# from langchain.document_loaders.parsers import OpenAIWhisperParser
+from langchain.document_loaders.parsers.audio import OpenAIWhisperParserLocal
 from pydantic import BaseModel
 
-from src.youtube import download_audio_from_url, is_youtube_link
+from src.services.whisper import whisper_model
+from src.youtube import download_audio_from_youtube, is_youtube_link
 
 app = FastAPI()
 
@@ -21,6 +28,12 @@ def process_input(source: str) -> dict:
     # For demonstration, we'll just return a large JSON object
     large_json = {"data": [{"id": i, "value": f"Item {i}"} for i in range(1000)]}
     return large_json
+
+
+def transcribe_file(filename: str) -> dict:
+    result = whisper_model.transcribe(filename)
+    pprint(result)
+    return result
 
 
 # FastAPI endpoint
@@ -42,7 +55,14 @@ def cli():
     source = args.source
     if is_youtube_link(args.source):
         print("Downloading audio from YouTube...")
-        source, _ = download_audio_from_url(args.source)
+        source, _ = download_audio_from_youtube(args.source)
+
+        loader = GenericLoader(
+            YoutubeAudioLoader([args.source], "data/tmp/audio/youtube"),
+            OpenAIWhisperParserLocal(lang_model="openai/whisper-large"),
+        )
+        docs = loader.load()
+        print(docs[0].text)
 
     result = process_input(source)
     print(json.dumps(result, indent=2))

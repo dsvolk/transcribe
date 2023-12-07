@@ -1,5 +1,14 @@
 # 🎙 Transcribe
-## How to set up
+## How to set up (MacOS)
+### Install system dependencies
+#### LLVM
+```console
+brew install llvm
+```
+#### FFmpeg
+```console
+brew install ffmpeg
+```
 ### Set up the Python environment
 #### Set up Poetry
 Install Poetry package manager:
@@ -30,10 +39,8 @@ Install all the Python packages and git pre-commit hooks locally within the proj
 ```console
 poetry install --no-root
 poetry run pre-commit install
-```
-OR simply
-```console
-make env
+LLVM_CONFIG=/usr/local/opt/llvm/bin/llvm-config poetry add llvmlite
+poetry add git+https://github.com/openai/whisper.git
 ```
 
 Update or create `requirements.txt`:
